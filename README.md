@@ -4,14 +4,22 @@ Projekat iz predmeta **Paralelni računarski sistemi**, tema **P19: Volumetric L
 
 Cilj je implementirati volumetrijsku maglu i svjetlo (snopovi svjetla, "god rays") po **froxel** pristupu (Wronski 2014, Hillaire 2015). Prvo pravimo sekvencijalnu CPU verziju, a zatim je paralelizujemo pomoću OpenMP-a i SIMD-a (AVX2). GPU verzija je tema drugog projekta.
 
+## Struktura repozitorija
+
+- [`opengl-forward-renderer/`](opengl-forward-renderer/): kompletan OpenGL renderer, izvorni kod, shaderi, resursi i upute za build. Početak: [upute za postavljanje](opengl-forward-renderer/docs/setup.md).
+- [`DOCS/Prezentacija/`](DOCS/Prezentacija/): prezentacija projekta.
+- [`DOCS/Izvori/`](DOCS/Izvori/): literatura i linkovi na radove, slajdove i implementacije.
+
+Renderer se gradi iz foldera `opengl-forward-renderer/` pomoću postojećih skripti `build.bat` ili `build.sh`.
+
 ## Izvori
 
-Folder `Izvori/` sadrži naučne radove, slajdove i linkove. Radovi na kojima se zasniva prezentacija su označeni sa ★.
+Folder [`DOCS/Izvori/`](DOCS/Izvori/README.md) sadrži linkove na naučne radove, slajdove i implementacije kod autora i izdavača, uključujući dostupne PDF-ove. Radovi na kojima se zasniva prezentacija su označeni sa ★.
 
 - **Pregled metoda/**: pregled oblasti i drugih pristupa, da opravdamo zašto ih ne biramo.
   - *Volumetric Light Scattering as a Post-Process* (Mitchell, GPU Gems 3, pogl. 13, 2008): radial blur u screen-spaceu. Jeftino, ali nije fizikalno tačno.
   - Ray marching kroz shadow map po pikselu: tačno, ali broj shadow-map uzoraka raste s brojem piksela × koraka.
-  - *Real Time Volumetric Shadows using Polygonal Light Volumes* (HPG 2010): analitički pristup bez ray marchinga (provjeriti autore prije citiranja).
+  - *Real Time Volumetric Shadows using Polygonal Light Volumes* (Billeter, Sintorn, Assarsson, HPG 2010): analitički pristup bez ray marchinga.
   - *Real-Time Multiple Scattering using Light Propagation Volumes* (I3D 2012): aproksimacija višestrukog raspršenja.
 - **Zasto Froxel/**: radovi koji su osnova za izabrani pristup.
   - ★ *Volumetric Fog: Unified Compute Shader Based Solution to Atmospheric Scattering* (Wronski, SIGGRAPH 2014): **osnova algoritma**. Slajd "Why not 2D raymarching?" je izvor kriterija poređenja ray marching naspram froxela.
@@ -20,17 +28,17 @@ Folder `Izvori/` sadrži naučne radove, slajdove i linkove. Radovi na kojima se
 - **Teorija/**
   - ★ *Monte Carlo Methods for Physically Based Volume Rendering* (Novák et al., SIGGRAPH 2018 course): jednačina prijenosa zračenja, Beer-Lambert, fazne funkcije.
 - **Paralelizacije (CPU)/**: literatura za paralelizaciju volumetrijskog renderiranja na CPU-u.
-  - *Fast CPU Volume Rendering with Coherent BVH Traversal* (Knoll et al.): CPU volume ray casting s višenitnim packet ray tracerom i SSE vektorskim instrukcijama za integraciju. Zaključak autora je da optimizovan CPU renderer može biti konkurentan GPU-u (provjeriti tačan naziv rada i konferenciju prije citiranja).
+  - *Full-Resolution Interactive CPU Volume Rendering with Coherent BVH Traversal* (Knoll et al., IEEE TVCG 2011): CPU volume ray casting, koherentni BVH traversal i SIMD optimizacije integracije. Poređenje s GPU-om odnosi se na konkretne konfiguracije i skupove podataka iz rada.
   - *Volume Rendering on Scalable Shared-Memory MIMD Architectures* (Nieh, Levoy, 1992): paralelni volume rendering na višeprocesorskim mašinama sa zajedničkom memorijom, uz task queue podjelu slike. Direktno povezano s našim izborom `static` i `dynamic` rasporeda u OpenMP-u.
   - *ispc: A SPMD Compiler for High-Performance CPU Programming* (Pharr, Mark, InPar 2012): SPMD-on-SIMD model, jedna instanca programa po SIMD lane-u. Opciona referenca ako SIMD radimo i izvan intrinsics-a.
   - *Embree: A Kernel Framework for Efficient CPU Ray Tracing* (Wald et al., ACM TOG 2014): primjer iskorištavanja višejezgrenosti i širokih SIMD jedinica (SSE, AVX, AVX2) u CPU renderingu. Koristimo je kao referencu za projektovanje SIMD kernela, ne za sam algoritam.
   - *Memory Layout Transformations* (Intel): pretvaranje AoS u SoA da se izbjegnu gather i scatter operacije u vektorizovanom kodu. Opravdanje za naš SoA raspored.
-- `linkovi-implementacije.md`: tuđi repozitoriji i implementacije (npr. Godot 4 volumetric fog).
+- [`linkovi-implementacije.md`](DOCS/Izvori/linkovi-implementacije.md): tuđi repozitoriji i implementacije (npr. Godot 4 volumetric fog).
 
 ## Prezentacija (3. 11. 2026)
 
-Folder `Prezentacija/`:
-- `P19_Volumetric_Fog_and_Light.pptx`: slajdovi (10 min, 3 govornika).
+Folder [`DOCS/Prezentacija/`](DOCS/Prezentacija/):
+- [`P19_Volumetric_Fog_and_Light.pptx`](DOCS/Prezentacija/P19_Volumetric_Fog_and_Light.pptx): slajdovi (10 min, 3 govornika).
 
 Sadržaj: fizika (atmospheric scattering, Beer-Lambert), primjeri, ray marching po pikselu (referentna implementacija), froxel (glavni pristup), plan paralelizacije na CPU-u (OpenMP + SIMD).
 

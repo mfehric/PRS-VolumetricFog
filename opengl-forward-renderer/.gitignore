@@ -1,0 +1,11 @@
+.cache
+/external/*
+!/external/glad
+/build/*
+compile_commands.json
+.vscode
+.vs/
+/imgui.ini
+/test-app/imgui.ini
+.VSCodeCounter/
+/assets/models/fbx/bistro_v5_2/
