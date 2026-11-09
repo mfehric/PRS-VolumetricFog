@@ -4,6 +4,7 @@
 #include "scene/FrameSubmission.h"
 #include "scene/RenderItem.h"
 #include "core/Camera.h"
+#include "core/VolumetricRay.h"
 #include "utils/Options.h"
 #include "core/Material.h"
 #include "core/Renderer.h"
@@ -69,6 +70,9 @@ Application::Application()
 
 Application::~Application()
 {
+    if (m_volumetricTexture != 0)
+        glDeleteTextures(1, &m_volumetricTexture);
+    
     m_fullscreenQuad.reset();
     m_toneMappingShader.reset();
     m_brightPassShader.reset();
@@ -273,6 +277,15 @@ void Application::RunFrame(Scene &scene,
     scene.OnPostRender();
     // RenderPostProcess immediately binds its own FBOs and reads the HDR texture
     // by GL texture ID, so the HDR FBO being bound here is not a problem.
+    if (m_ui->volumetricsEnabled && sub.camera)
+    {
+        ComputeVolumetrics(*sub.camera);
+    }
+    else
+    {
+        m_volumetricWidth = 0;
+        m_volumetricHeight = 0;
+    }
     const auto postProcessStart = CpuClock::now();
     RenderPostProcess(sub.clearInfo.viewport.x,
                       sub.clearInfo.viewport.y,
@@ -300,6 +313,59 @@ void Application::RunFrame(Scene &scene,
     }
 
     glfwSwapBuffers(m_window);
+}
+
+void Application::ComputeVolumetrics(const Camera &camera)
+{
+    m_volumetricWidth = 0;
+    m_volumetricHeight = 0;
+
+    if (!m_renderer->ReadBoundHdrDepth(m_sceneDepth))
+        return;
+
+    const auto &stats = m_renderer->GetDebugStats();
+    const uint32_t sceneWidth = stats.hdrWidth;
+    const uint32_t sceneHeight = stats.hdrHeight;
+
+    m_volumetricWidth = std::max(1u, sceneWidth / 4);
+    m_volumetricHeight = std::max(1u, sceneHeight / 4);
+    m_volumetricPixels.resize(
+        static_cast<std::size_t>(m_volumetricWidth) * m_volumetricHeight * 2);
+
+    const glm::mat4 inverseViewProjection = glm::inverse(camera.GetViewProjection());
+    const glm::vec3 cameraPosition = camera.GetPosition();
+
+    const auto volumetricStart = CpuClock::now();
+    for (uint32_t y = 0; y < m_volumetricHeight; ++y)
+    {
+        const auto depthY = static_cast<uint32_t>(
+            (y + 0.5f) * sceneHeight / m_volumetricHeight);
+
+        for (uint32_t x = 0; x < m_volumetricWidth; ++x)
+        {
+            const auto depthX = static_cast<uint32_t>(
+                (x + 0.5f) * sceneWidth / m_volumetricWidth);
+            const std::size_t depthIndex =
+                static_cast<std::size_t>(depthY) * sceneWidth + depthX;
+
+            const glm::vec2 pixelUv(
+                (depthX + 0.5f) / sceneWidth,
+                (depthY + 0.5f) / sceneHeight);
+
+            const float rayLength = GetVolumetricRayLength(
+                pixelUv, m_sceneDepth[depthIndex],
+                inverseViewProjection, cameraPosition, 50.0f);
+
+            const VolumetricRayResult ray =
+                MarchVolumetricRay(rayLength, m_ui->volumetricFogDensity, 0.35f, 32);
+
+            const std::size_t outputIndex =
+                (static_cast<std::size_t>(y) * m_volumetricWidth + x) * 2;
+            m_volumetricPixels[outputIndex] = ray.transmittance;
+            m_volumetricPixels[outputIndex + 1] = ray.inScattering;
+        }
+    }
+    m_ui->volumetricCpuMs = ElapsedMilliseconds(volumetricStart);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -542,14 +608,54 @@ void Application::RenderPostProcess(int x, int y, int width, int height)
     m_toneMappingShader->SetUniform("u_Exposure",            m_ui->exposure);
     m_toneMappingShader->SetUniform("u_ToneMappingEnabled",  m_ui->tonemapEnabled);
     m_toneMappingShader->SetUniform("u_DebugView",           debugView);
+    const bool hasVolumetrics = m_volumetricWidth > 0 && m_volumetricHeight > 0;
+    m_toneMappingShader->SetUniform("u_VolumetricBuffer", 2);
+    m_toneMappingShader->SetUniform("u_VolumetricsEnabled", hasVolumetrics);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, stats.hdrColorTextureId);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, bloomInputForComposite);
+    if (hasVolumetrics)
+    {
+        glActiveTexture(GL_TEXTURE2);
+
+        if (m_volumetricTexture == 0)
+        {
+            glGenTextures(1, &m_volumetricTexture);
+            glBindTexture(GL_TEXTURE_2D, m_volumetricTexture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, m_volumetricTexture);
+        }
+
+        if (m_volumetricTextureWidth != m_volumetricWidth ||
+            m_volumetricTextureHeight != m_volumetricHeight)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F,
+                         m_volumetricWidth, m_volumetricHeight, 0,
+                         GL_RG, GL_FLOAT, nullptr);
+            m_volumetricTextureWidth = m_volumetricWidth;
+            m_volumetricTextureHeight = m_volumetricHeight;
+        }
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                        m_volumetricWidth, m_volumetricHeight,
+                        GL_RG, GL_FLOAT, m_volumetricPixels.data());
+    }
     glEnable(GL_FRAMEBUFFER_SRGB);
     m_fullscreenQuad->Draw();
     glDisable(GL_FRAMEBUFFER_SRGB);
+    if (hasVolumetrics)
+    {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
     glActiveTexture(GL_TEXTURE0);

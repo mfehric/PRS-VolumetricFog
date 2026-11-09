@@ -498,6 +498,21 @@ void Renderer::RebindHdrFramebuffer()
         m_hdrFramebuffer->Bind();
 }
 
+bool Renderer::ReadBoundHdrDepth(std::vector<float> &depth) const
+{
+    if (!m_hdrFramebuffer || !m_hdrFramebuffer->IsValid())
+        return false;
+
+    const auto width = m_hdrFramebuffer->GetWidth();
+    const auto height = m_hdrFramebuffer->GetHeight();
+
+    depth.resize(static_cast<std::size_t>(width) * height);
+    glReadPixels(0, 0,
+                 static_cast<GLsizei>(width), static_cast<GLsizei>(height),
+                 GL_DEPTH_COMPONENT, GL_FLOAT, depth.data());
+    return true;
+}
+
 void Renderer::SubmitDraw(const RenderItem &item)
 {
     assert(m_inFrame && "SubmitDraw() must be called between BeginFrame() and EndFrame()");

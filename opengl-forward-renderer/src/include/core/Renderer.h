@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <vector>
 #include <glm/glm.hpp>
 #include "core/InitContext.h"
 #include "core/SubmissionContext.h"
@@ -208,6 +209,8 @@ public:
     /// Enqueues a draw item. Must be called between BeginFrame and EndFrame.
     void SubmitDraw(const RenderItem &item);
 
+    bool ReadBoundHdrDepth(std::vector<float> &depth) const;
+    
     /// Called by the GLFW framebuffer-resize callback. Viewport is driven each frame
     /// through FrameSubmission::clearInfo; this method only logs the new dimensions.
     void Resize(int width, int height);

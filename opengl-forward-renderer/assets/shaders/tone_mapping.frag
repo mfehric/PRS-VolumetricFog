@@ -4,6 +4,8 @@ out vec4 FragColor;
 
 uniform sampler2D u_HdrBuffer;
 uniform sampler2D u_BloomBlur;
+uniform sampler2D u_VolumetricBuffer;
+uniform bool u_VolumetricsEnabled;
 uniform float u_BloomStrength;
 uniform bool u_BloomEnabled;
 uniform float u_Exposure;
@@ -60,6 +62,11 @@ vec3 ApplyToneMapping(vec3 hdrColor)
 void main()
 {
     vec3 hdrColor = texture(u_HdrBuffer, v_TexCoord).rgb;
+    if (u_VolumetricsEnabled)
+    {
+        vec2 volume = texture(u_VolumetricBuffer, v_TexCoord).rg;
+        hdrColor = hdrColor * volume.r + vec3(volume.g);
+    }
     vec3 bloomColor = texture(u_BloomBlur, v_TexCoord).rgb;
     vec3 combinedHdr = hdrColor;
     if (u_BloomEnabled)

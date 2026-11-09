@@ -433,7 +433,7 @@ void RendererUI::DrawSidebar(int fbH,
         const int visibleTabCount = kTabCount + (hasTerrain ? 1 : 0);
 
         ImGui::SetCursorPos({16, 16});
-        ImGui::BeginChild("##tabBar", ImVec2(kSidebarWidth - 32, 36),
+        ImGui::BeginChild("##tabBar", ImVec2(kSidebarWidth - 32, 66),
                           false, ImGuiWindowFlags_NoScrollbar);
 
         const float tabW = (kSidebarWidth - 32) / static_cast<float>(visibleTabCount);
@@ -459,6 +459,8 @@ void RendererUI::DrawSidebar(int fbH,
             ImGui::PopStyleColor(4);
             if (i < visibleTabCount - 1) ImGui::SameLine(0, 0);
         }
+        if (ImGui::Button("Volumetrics", ImVec2(kSidebarWidth - 32, 30)))
+            m_activeTab = UITab::Volumetrics;
         ImGui::EndChild();
 
         ImGui::Separator();
@@ -482,6 +484,7 @@ void RendererUI::DrawSidebar(int fbH,
             case UITab::PostFX:    DrawTabPostFX(scene, stats);          break;
             case UITab::Stats:     DrawTabStats(scene, stats);           break;
             case UITab::Terrain:   DrawTabTerrain(scene);                break;
+            case UITab::Volumetrics: DrawTabVolumetrics();               break;
         }
 
         if (lookMode) {
@@ -1309,6 +1312,14 @@ void RendererUI::DrawTabStats(Scene & /*scene*/, const RendererDebugStats &stats
 // ─────────────────────────────────────────────────────────────────────────────
 void RendererUI::DrawTabTerrain(Scene &scene) {
     scene.OnTerrainTabUI();
+}
+
+void RendererUI::DrawTabVolumetrics() {
+    ImGui::TextUnformatted("Sequential CPU Volumetrics");
+    ImGui::Checkbox("Enable Volumetrics", &volumetricsEnabled);
+    ImGui::SliderFloat("Fog Density", &volumetricFogDensity, 0.0f, 0.1f, "%.3f");
+    if (volumetricsEnabled)
+        ImGui::Text("CPU Volumetrics: %.2f ms", volumetricCpuMs);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

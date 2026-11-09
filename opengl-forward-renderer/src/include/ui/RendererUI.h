@@ -18,6 +18,7 @@ enum class UITab : int {
     PostFX = 4,
     Stats = 5,
     Terrain = 6,  ///< Only shown when the active scene returns HasTerrainTab() == true
+    Volumetrics = 7,
 };
 
 class RendererUI {
@@ -50,6 +51,9 @@ public:
     bool wireframeOverride = false;
     bool normalMapOverride = true;
     bool skyboxOverride = true;
+    bool volumetricsEnabled = true;
+    float volumetricFogDensity = 0.04f;
+    float volumetricCpuMs = 0.0f;
     // After: bool skyboxOverride = true;
     bool  tonemapEnabled        = true;
     int   tonemapOperator       = 1;   // 0=Reinhard, 1=ACES, 2=Uncharted2
@@ -119,6 +123,8 @@ private:
     void DrawTabStats(Scene &scene, const RendererDebugStats &stats);
 
     void DrawTabTerrain(Scene &scene);
+
+    void DrawTabVolumetrics();
 
     void DrawHelpWindow(int fbWidth, int fbHeight);
 };

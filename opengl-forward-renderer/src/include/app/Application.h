@@ -5,6 +5,7 @@
 #include <vector>
 
 struct GLFWwindow;
+class Camera;
 class Renderer;
 class IInputProvider;
 class InputManager;
@@ -85,6 +86,16 @@ private:
     void RunFrame(Scene &scene,
                   const std::vector<Scene *> &scenes,
                   std::size_t &activeSceneIndex);
+
+    std::vector<float> m_sceneDepth;
+    std::vector<float> m_volumetricPixels;
+    uint32_t m_volumetricWidth = 0;
+    uint32_t m_volumetricHeight = 0;
+    uint32_t m_volumetricTexture = 0;
+    uint32_t m_volumetricTextureWidth = 0;
+    uint32_t m_volumetricTextureHeight = 0;
+
+    void ComputeVolumetrics(const Camera &camera);
 
     void RenderPostProcess(int x, int y, int width, int height);
 
