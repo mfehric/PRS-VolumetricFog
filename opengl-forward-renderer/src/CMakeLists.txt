@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 # Renderer static library — OpenGL backend
 add_library(${PROJECT_NAME} STATIC
         opengl/app/Application.cpp
+        opengl/app/VolumetricValidation.cpp
         opengl/core/Renderer.cpp
+        opengl/core/VolumetricLighting.cpp
+        opengl/core/VolumetricPass.cpp
         opengl/core/FrameClearInfo.cpp
         opengl/core/SubmissionContext.cpp
         opengl/core/InitContext.cpp

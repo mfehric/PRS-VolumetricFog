@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <vector>
 #include <glm/glm.hpp>
 #include "core/InitContext.h"
 #include "core/SubmissionContext.h"
@@ -15,6 +14,7 @@
 #include "core/IBLDebugMode.h"
 #include "core/shadows/CascadedShadowMap.h"
 #include "core/RenderConfig.h"
+#include "core/VolumetricPass.h"
 #include "core/Frustum.h"
 
 struct RenderItem;
@@ -141,6 +141,7 @@ struct RendererDebugStats
     bool shadowPassDataAvailable = false;
     bool approxTriangleCountApproximate = true; // Triangle estimates are pragmatic and treat non-triangle topologies as 0.
     bool shadowMapPreviewAvailable = false;
+    VolumetricStats volumetric;
 };
 
 /// Manages the OpenGL rendering pipeline.
@@ -163,6 +164,8 @@ class Renderer
     std::unique_ptr<ShaderProgram> m_shadowDepthShader;
     std::unique_ptr<CascadedShadowMap> m_directionalShadowMap;
     std::unique_ptr<HdrFramebuffer> m_hdrFramebuffer;
+    std::unique_ptr<VolumetricPass> m_volumetricPass;
+    VolumetricStats m_volumetricStats;
     std::unique_ptr<EnvironmentLightingPipeline> m_environmentLightingPipeline;
     const Skybox* m_currentSkybox = nullptr;
     const Camera* m_currentCamera = nullptr;
@@ -206,11 +209,14 @@ public:
     /// No-op if no HDR framebuffer is active.
     void RebindHdrFramebuffer();
 
+    // Call after all opaque/scene-specific draws, before bloom and tone mapping.
+    void RenderVolumetrics(const FrameSubmission& submission, const VolumetricSettings& settings);
+    const VolumetricStats& GetVolumetricStats() const { return m_volumetricStats; }
+    uint32_t GetVolumetricResultTexture() const { return m_volumetricStats.active && m_volumetricPass ? m_volumetricPass->GetResultTexture() : 0; }
+
     /// Enqueues a draw item. Must be called between BeginFrame and EndFrame.
     void SubmitDraw(const RenderItem &item);
 
-    bool ReadBoundHdrDepth(std::vector<float> &depth) const;
-    
     /// Called by the GLFW framebuffer-resize callback. Viewport is driven each frame
     /// through FrameSubmission::clearInfo; this method only logs the new dimensions.
     void Resize(int width, int height);

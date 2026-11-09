@@ -41,6 +41,7 @@ public:
 
     /// Returns the GL_RGBA16F color texture for the post-process pass.
     [[nodiscard]] uint32_t GetColorTexture() const { return m_colorTexture; }
+    [[nodiscard]] uint32_t GetFramebuffer() const { return m_fbo; }
 
     [[nodiscard]] uint32_t GetWidth()  const { return m_width;  }
     [[nodiscard]] uint32_t GetHeight() const { return m_height; }

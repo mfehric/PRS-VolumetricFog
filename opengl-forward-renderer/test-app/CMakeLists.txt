@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Test application executable
 add_executable(${PROJECT_NAME}
         src/main.cpp
+        src/VolumetricDemoScene.cpp
         src/CapturePresetScene.h
         src/CapturePresetScene.cpp
         src/SampleScene.cpp

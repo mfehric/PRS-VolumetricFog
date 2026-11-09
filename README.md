@@ -2,7 +2,15 @@
 
 Projekat iz predmeta **Paralelni računarski sistemi**, tema **P19: Volumetric Light and Fog**. Nadovezuje se na naš OpenGL forward renderer.
 
-Cilj je implementirati volumetrijsku maglu i svjetlo (snopovi svjetla, "god rays") po **froxel** pristupu (Wronski 2014, Hillaire 2015). Prvo pravimo sekvencijalnu CPU verziju, a zatim je paralelizujemo pomoću OpenMP-a i SIMD-a (AVX2). GPU verzija je tema drugog projekta.
+Trenutna prva faza implementira volumetrijsku maglu i svjetlo (snopovi svjetla, "god rays") pomoću **ray marchinga po pikselu**, uz sekvencijalni CPU i odgovarajući GPU režim. CPU paralelizacija nije implementirana. **Froxel** pristup (Wronski 2014, Hillaire 2015), OpenMP i SIMD ostaju plan daljeg razvoja.
+
+## Pokretanje volumetrijskog demoa
+
+Iz foldera `opengl-forward-renderer/`, nakon builda, pokrenuti `build/test-app/TestApp.exe --volumetric-demo` (na Linuxu bez `.exe`). U zasebnom panelu **Volumetrics** uključiti ili isključiti **Enable Volumetrics**, a kada je efekat uključen izabrati **CPU (sequential)** ili **GPU**. Tipka **V** kruži kroz Normal/CPU/GPU. Demo ne zahtijeva Bistro resurse; `--bistro-demo` direktno otvara Bistro kada su njegovi resursi instalirani.
+
+Objedinjena verzija zadržava osnovnu meku maglu i dodaje shadowed directional single scattering. **Soft fog preset** naglašava maglu, a **Window shafts preset** zrake kroz prozore. CPU i GPU koriste isti model; CPU ostaje sekvencijalan, bez OpenMP-a i radnih niti.
+
+[Implementacija, build komande, fizikalni model, provjere i ograničenja](opengl-forward-renderer/docs/volumetric-lighting.md). Raniji froxel plan i literatura u nastavku predstavljaju istraživanje i naredne faze.
 
 ## Struktura repozitorija
 
@@ -69,7 +77,7 @@ T_i      = exp(-sigma_t * dz)
 doprinos = (S - S * T_i) / sigma_t        // za sigma_t -> 0 granična vrijednost je S * dz
 ```
 
-## Početni plan implementacije
+## Plan nastavka: froxel, SIMD i OpenMP
 
 C++20 i CMake. Froxel grid je `W × H × D` ćelija poravnat s frustumom kamere (rezolucija je parametar, npr. 160×90×64; provjeriti u Wronskijevim slajdovima). Podaci su u **SoA** rasporedu (posebni nizovi za `sigma_t`, `S` i `T`) zbog SIMD-a.
 
@@ -82,9 +90,9 @@ C++20 i CMake. Froxel grid je `W × H × D` ćelija poravnat s frustumom kamere 
 3. **OpenMP.** Injection: `parallel for` po (z,y), SIMD po x. Integracija: paralelno po (x,y) stupcima (`static` i `dynamic` raspored), sekvencijalno po z. Moguća blokovska (tiled) podjela zbog keša.
 4. **Mjerenja.** Rezolucija grida, broj niti, speedup i efikasnost u odnosu na sekvencijalnu verziju, strong i weak scaling, poređenje skalarne, SIMD i AVX2 verzije.
 
-## Nastavak: GPU verzija (kasnije)
+## Nastavak: GPU froxel verzija (kasnije)
 
-GPU implementacija dolazi u drugom projektu, pa je ovdje ostavljamo kao smjer nastavka. Cilj je da CPU verzija iz ovog projekta bude **referenca ispravnosti i baseline za poređenje** (isti `sigma`, `g`, svjetlo, ista scena).
+Početna GPU ray-marching referenca već postoji uz sekvencijalnu CPU verziju. Sljedeći plan odnosi se na budući **froxel** prenos na GPU, a ne na trenutno implementirani pass. Cilj ostaje da CPU verzija bude **referenca ispravnosti i baseline za poređenje** (isti `sigma`, `g`, svjetlo, ista scena).
 
 Plan prenosa na GPU (OpenGL compute shaderi):
 - *Injection*: jedna nit po froxelu (3D dispatch), isti kernel kao CPU verzija.
@@ -110,7 +118,7 @@ Svaki korak se provjerava prije sljedećeg:
 
 ## Otvorena pitanja
 
-- **Shadow mapa na CPU-u.** Mapa je u GPU memoriji, a injection je na CPU-u. Opcije: (1) readback svaki frame (spor transfer može pokvariti mjerenja), (2) CPU rasterizacija dubinske mape iz svjetla, (3) statična testna scena s mapom iz fajla. Odluka: TODO.
+- **Shadow mapa na CPU-u.** Prva ray-marching faza koristi readback aktuelne scene depth i directional CSM mapa svaki frame. Vrijeme prenosa se prikazuje odvojeno od sekvencijalne integracije. Za budući froxel/injection ostaje procijeniti readback, CPU rasterizaciju ili statičnu testnu mapu; transfer treba odvojiti od mjerenja ubrzanja kernela.
 - Potvrditi s profesorom da je CPU (OpenMP/SIMD) traženi cilj, a GPU ide u drugi projekat.
 
 ## Rječnik pojmova

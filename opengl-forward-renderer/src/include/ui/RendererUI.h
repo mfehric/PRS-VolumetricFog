@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <vector>
 #include "core/IBLDebugMode.h"
+#include "core/VolumetricLighting.h"
 
 class Scene;
 class Renderer;
@@ -51,9 +52,7 @@ public:
     bool wireframeOverride = false;
     bool normalMapOverride = true;
     bool skyboxOverride = true;
-    bool volumetricsEnabled = true;
-    float volumetricFogDensity = 0.04f;
-    float volumetricCpuMs = 0.0f;
+    VolumetricSettings volumetric{.enabled = true, .backend = VolumetricBackend::GPU};
     // After: bool skyboxOverride = true;
     bool  tonemapEnabled        = true;
     int   tonemapOperator       = 1;   // 0=Reinhard, 1=ACES, 2=Uncharted2
@@ -79,7 +78,7 @@ private:
     int m_vpX = 0, m_vpY = 0, m_vpW = 0, m_vpH = 0;
     int m_prevVpW = -1, m_prevVpH = -1;
 
-    UITab m_activeTab = UITab::Scene;
+    UITab m_activeTab = UITab::Volumetrics;
 
     // ── Draw helpers ──────────────────────────────────────────────────────────
     void DrawTopbar(int fbWidth,
@@ -124,7 +123,7 @@ private:
 
     void DrawTabTerrain(Scene &scene);
 
-    void DrawTabVolumetrics();
+    void DrawTabVolumetrics(const RendererDebugStats& stats);
 
     void DrawHelpWindow(int fbWidth, int fbHeight);
 };

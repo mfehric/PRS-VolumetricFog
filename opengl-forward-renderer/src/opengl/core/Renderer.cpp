@@ -297,6 +297,7 @@ bool Renderer::Initialize()
 
 void Renderer::Shutdown()
 {
+    m_volumetricPass.reset();
     if (m_environmentLightingPipeline)
     {
         m_environmentLightingPipeline->Shutdown();
@@ -498,19 +499,38 @@ void Renderer::RebindHdrFramebuffer()
         m_hdrFramebuffer->Bind();
 }
 
-bool Renderer::ReadBoundHdrDepth(std::vector<float> &depth) const
+void Renderer::RenderVolumetrics(const FrameSubmission& submission, const VolumetricSettings& settings)
 {
-    if (!m_hdrFramebuffer || !m_hdrFramebuffer->IsValid())
-        return false;
-
-    const auto width = m_hdrFramebuffer->GetWidth();
-    const auto height = m_hdrFramebuffer->GetHeight();
-
-    depth.resize(static_cast<std::size_t>(width) * height);
-    glReadPixels(0, 0,
-                 static_cast<GLsizei>(width), static_cast<GLsizei>(height),
-                 GL_DEPTH_COMPONENT, GL_FLOAT, depth.data());
-    return true;
+    m_volumetricStats = {};
+    m_debugStats.volumetric = {};
+    if (!settings.enabled || !submission.camera || !m_hdrFramebuffer || !m_hdrFramebuffer->IsValid())
+        return;
+    VolumetricFrame frame;
+    frame.inverseViewProjection = glm::inverse(submission.camera->GetViewProjection());
+    frame.view = submission.camera->GetView();
+    frame.cameraPosition = submission.camera->GetPosition();
+    if (submission.lights.HasDirectionalLight())
+    {
+        const auto& light = submission.lights.GetDirectionalLight();
+        if (glm::dot(light.direction, light.direction) > 1e-8f)
+            frame.lightDirection = glm::normalize(light.direction);
+        if (light.enabled)
+            frame.lightRadiance = glm::max(light.color, glm::vec3(0.0f)) * std::max(light.intensity, 0.0f);
+    }
+    frame.hasShadows = m_debugStats.shadowPassDataAvailable && m_directionalShadowMap && m_directionalShadowMap->IsValid();
+    frame.shadowMatrices = m_cascadeViewProj;
+    frame.shadowSplits = m_cascadeSplits;
+    const uint32_t shadowTexture = frame.hasShadows ? m_directionalShadowMap->GetDepthTextureArray() : 0;
+    if (frame.hasShadows)
+    {
+        frame.shadowWidth = m_directionalShadowMap->GetWidth();
+        frame.shadowHeight = m_directionalShadowMap->GetHeight();
+    }
+    if (!m_volumetricPass) m_volumetricPass = std::make_unique<VolumetricPass>();
+    m_volumetricPass->Render(frame, settings, m_hdrFramebuffer->GetFramebuffer(),
+                            m_hdrFramebuffer->GetWidth(), m_hdrFramebuffer->GetHeight(), shadowTexture);
+    m_volumetricStats = m_volumetricPass->GetStats();
+    m_debugStats.volumetric = m_volumetricStats;
 }
 
 void Renderer::SubmitDraw(const RenderItem &item)

@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <string>
 
 struct GLFWwindow;
-class Camera;
 class Renderer;
 class IInputProvider;
 class InputManager;
@@ -27,6 +27,9 @@ public:
     /// Reads window settings (size, title, vsync) from config/settings.json via Options.
     /// @return true on success, false if GLFW or GLAD initialization fails
     bool Initialize();
+
+    // Deterministic integration checks and screenshots, with a current GL context.
+    bool ValidateVolumetrics(Scene& scene, const std::string& outputDirectory);
 
     /// Runs the main loop, driving the given scene each frame.
     /// Calls scene.OnUpdate() then renders all objects the scene contains.
@@ -86,16 +89,6 @@ private:
     void RunFrame(Scene &scene,
                   const std::vector<Scene *> &scenes,
                   std::size_t &activeSceneIndex);
-
-    std::vector<float> m_sceneDepth;
-    std::vector<float> m_volumetricPixels;
-    uint32_t m_volumetricWidth = 0;
-    uint32_t m_volumetricHeight = 0;
-    uint32_t m_volumetricTexture = 0;
-    uint32_t m_volumetricTextureWidth = 0;
-    uint32_t m_volumetricTextureHeight = 0;
-
-    void ComputeVolumetrics(const Camera &camera);
 
     void RenderPostProcess(int x, int y, int width, int height);
 

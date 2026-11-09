@@ -6,8 +6,10 @@
 #include "BistroScene.h"
 #include "CapturePresetScene.h"
 #include "TerrainScene.h"
+#include "VolumetricDemoScene.h"
+#include <string_view>
 
-int main()
+int main(int argc, char** argv)
 {
     spdlog::info("[TestApp] Starting");
 
@@ -16,6 +18,26 @@ int main()
     {
         spdlog::error("[TestApp] Application::Initialize() failed — aborting");
         return -1;
+    }
+
+    VolumetricDemoScene volumetricScene;
+    const bool volumetricOk = volumetricScene.Setup();
+    if (argc > 1 && std::string_view(argv[1]) == "--volumetric-validate")
+        return volumetricOk && app.ValidateVolumetrics(volumetricScene, "build/volumetric-validation") ? 0 : 1;
+    if (argc > 1 && std::string_view(argv[1]) == "--volumetric-demo")
+    {
+        if (!volumetricOk) return 1;
+        app.Run(std::vector<Scene*>{&volumetricScene});
+        return 0;
+    }
+    if (argc > 1 && (std::string_view(argv[1]) == "--bistro-validate" || std::string_view(argv[1]) == "--bistro-demo"))
+    {
+        BistroScene bistro;
+        if (!bistro.Setup()) return 1;
+        if (std::string_view(argv[1]) == "--bistro-validate")
+            return app.ValidateVolumetrics(bistro, "build/bistro-volumetric-validation") ? 0 : 1;
+        app.Run(std::vector<Scene*>{&bistro});
+        return 0;
     }
 
     TerrainScene terrainScene;
@@ -52,6 +74,7 @@ int main()
     if (captureDenseGridOk) scenes.push_back(&captureDenseGrid);
     if (captureMaterialSweepOk) scenes.push_back(&captureMaterialSweep);
     if (captureCullingOk) scenes.push_back(&captureCulling);
+    if (volumetricOk) scenes.push_back(&volumetricScene);
 
     for (std::size_t i = 0; i < scenes.size(); ++i)
         spdlog::info("[TestApp] Press {} for {}", i + 1, scenes[i]->GetName());
