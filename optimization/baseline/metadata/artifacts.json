@@ -1,0 +1,107 @@
+[
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-cpu\\baseline_01.csv",
+    "archived": "results/baseline_01.csv",
+    "bytes": 123232,
+    "sha256": "9b3697288d6d26d6b884fa92c25251de9d751b50f8f9f963bae8dafca7ff1776"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-cpu\\baseline_02.csv",
+    "archived": "results/baseline_02.csv",
+    "bytes": 123479,
+    "sha256": "f6c56d8688491495f9327b1a2e54f8abc1936f44d9f304cc8b29944a29395389"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-cpu\\baseline_03.csv",
+    "archived": "results/baseline_03.csv",
+    "bytes": 123378,
+    "sha256": "adc5bc43cf333a6cf299bc4804a45be0534209b1ac675d7d563d9187c2ed6058"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-cpu\\baseline_04.csv",
+    "archived": "results/baseline_04.csv",
+    "bytes": 123677,
+    "sha256": "8f8973feb8b4f40d719e48cac787752f7b3a9ce4e3eaf1ef1a28691935d24cd2"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-cpu\\baseline_05.csv",
+    "archived": "results/baseline_05.csv",
+    "bytes": 123515,
+    "sha256": "65b1c27414ca6bac3c9586ac3e58f43fded9ae8967d102c64f552d9016832b8c"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 222131.png",
+    "archived": "screenshots/hotspots-summary.png",
+    "bytes": 87452,
+    "sha256": "9d9d72a0d3b9a03e6d67dcbb641bd1ffbd8ae57e6132e8d7949978bbd4faa679"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 222449.png",
+    "archived": "screenshots/grouped-metrics.png",
+    "bytes": 77698,
+    "sha256": "3e4dcb97b4a58feec3b9b74013a9818b20894c884374498d8e888356090b8925"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 222505.png",
+    "archived": "screenshots/function-hotspots.png",
+    "bytes": 89592,
+    "sha256": "d5f39cd755428fd25d4698a206724145d0009e45c9aca992f1f86629e61e31b8"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 222521.png",
+    "archived": "screenshots/call-graph.png",
+    "bytes": 96444,
+    "sha256": "81d9f56d26f5fb2afe882dac3f729a3b3cbcc32ea197fc276101f096c2f05efa"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 222648.png",
+    "archived": "screenshots/source-analysis-01.png",
+    "bytes": 117441,
+    "sha256": "0e5bb4db4f277b1e0bf4bb4dd4620305fc5ac6f5003e5d81962803de3a8eec0e"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 222718.png",
+    "archived": "screenshots/source-analysis-02.png",
+    "bytes": 102045,
+    "sha256": "ef88997d2dff9b4b4f9f99983570cc544e25f3316a78da9af4bfad780c5d4a84"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-11 230602.png",
+    "archived": "screenshots/hardware-profiling-limitations.png",
+    "bytes": 180882,
+    "sha256": "63c49c7bce127a87b69ee0e7b83e23a248766f9da707e0fa66c5a7430c722213"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\AppData\\Roaming\\AMDuProf\\AMDuProf-Hotspots-VolumetricBenchmark\\AMDuProf-VolumetricBenchmark-Hotspots_Nov-11-2026_22-17-56\\session.uprof",
+    "archived": "metadata/session.uprof",
+    "bytes": 13365,
+    "sha256": "7d2095ef670cccebf578b8dae858ed63375e4a1c681214adc7be98d68157a737"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-cpu\\timings_profile.csv",
+    "archived": "profiler/timings_profile.csv",
+    "bytes": 123305,
+    "sha256": "5e1ca016887c00daa2c86df35748dae106b4f007a42064625699ea7d838dc2ee"
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\AppData\\Roaming\\AMDuProf\\AMDuProf-Hotspots-VolumetricBenchmark\\AMDuProf-VolumetricBenchmark-Hotspots_Nov-11-2026_22-17-56\\callstack.db",
+    "archived": null,
+    "bytes": 1060864,
+    "sha256": "e2df32f4df00a3014677d104d09a2e256abb4c22af7f5b3323b6d504ffe9adec",
+    "note": "Original binary profiler database retained at source; not copied into Git."
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\AppData\\Roaming\\AMDuProf\\AMDuProf-Hotspots-VolumetricBenchmark\\AMDuProf-VolumetricBenchmark-Hotspots_Nov-11-2026_22-17-56\\cpu.db",
+    "archived": null,
+    "bytes": 7090176,
+    "sha256": "75c47f5e834d2297eeee611fdc39c87206cd6dfb74a219882b3c9d962791dc01",
+    "note": "Original binary profiler database retained at source; not copied into Git."
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\AppData\\Roaming\\AMDuProf\\AMDuProf-Hotspots-VolumetricBenchmark\\AMDuProf-VolumetricBenchmark-Hotspots_Nov-11-2026_22-17-56\\session.db",
+    "archived": null,
+    "bytes": 4730880,
+    "sha256": "f137866de19847c28836011daa5973aa3685611baf8d29a3c20a7f6b31fa252b",
+    "note": "Original binary profiler database retained at source; not copied into Git."
+  }
+]

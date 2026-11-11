@@ -1,0 +1,21 @@
+{
+  "source_commit": "ca93cdf9797ee30c0939a3114296acebd5cd1022",
+  "source_status_before_documentation": "clean",
+  "python_version": "3.13.4 (tags/v3.13.4:8a526ec, Jun  3 2025, 17:46:04) [MSC v.1943 64 bit (AMD64)]",
+  "source_sha256": {
+    "volumetrics/src/Lighting.cpp": "5efbcd7ce32393ad5cc7e60a2c44ff31fa3cbf038baca997a6e8e491a6eea63e",
+    "volumetrics/benchmark/main.cpp": "d917811daaf88ea6b2fbafd6928203cbc9f582e8f63a8dd2e2817e45513fcb54",
+    "volumetrics/benchmark/Workload.cpp": "5d032f02774667122b0ca448912955ff67b4f3b5181bb2e73564e2b4ee61d931",
+    "volumetrics/include/volumetrics/Lighting.h": "bd1bc53e6573ba229d5cf791e23d9fa8485c0c5029083cabcff9ae63623c77dc",
+    "volumetrics/CMakeLists.txt": "187da0fbcafdd8225cb89b40d62e7e32aa1638af755da5fa118e1a55518e12aa"
+  },
+  "binary_sha256_at_analysis": {
+    "build-cpu/volumetrics/VolumetricBenchmark.exe": "fd27b69dfd6c5f5505cebf56729bfe050fd9dda3284cca1eb01f92ef9e4fe150",
+    "build-cpu/volumetrics/libVolumetricCPU.dll": "52ee612c40eb984b56c4562686d314bb19d8bdd762590d782af4bc345f645cb1"
+  },
+  "historical_binary_identity": "Hashes recorded at analysis time; no historical checksum supplied for the profiling launch.",
+  "analysis_packages": {
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.4"
+  }
+}

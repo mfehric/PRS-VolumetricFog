@@ -1,15 +1,20 @@
-# Evidencija budućih optimizacija
+# Evidencija profiliranja i budućih optimizacija
 
-Ovaj folder je priprema za buduće mjerenje. Baseline profiliranje još nije urađeno.
+Završena je analiza **Baseline V0**, početnog sekvencijalnog CPU algoritma:
+[izvještaj, originalni CSV-ovi, screenshotovi i grafikoni](baseline/README.md).
+Dokumentovanje nije promijenilo CPU/GPU kod, benchmark parametre ni mjerenja.
 
 ```text
 optimization/
-  00-baseline/             izvorna sekvencijalna verzija
-    screenshots/          snimci AMD uProf-a
-    README.md             metapodaci i komande
-    metrics.csv           predložak rezultata
-  iterations/             kopirati isti format za 01-..., 02-...
-  comparisons/            poređenja s baselineom
+  baseline/               stvarni V0 podaci i analiza: pet serija × 1.000 mjerenja
+    results/              originalni CSV-ovi i izvedene statistike
+    screenshots/          originalne uProf slike
+    charts/               grafikoni izvedeni iz podataka
+    metadata/             konfiguracija, porijeklo i hash vrijednosti
+    profiler/             zasebna vremena profiliranog pokretanja
+  00-baseline/            raniji prazan predložak, nije druga serija mjerenja
+  iterations/             buduće iteracije: 01-..., 02-...
+  comparisons/            buduća poređenja s V0
 ```
 
 Za svaku iteraciju sačuvati stanje izvornog koda (commit/hash ili patch ako nije
@@ -26,3 +31,7 @@ služi analizi, a samo po sebi dodaje trošak mjerenju.
 Detalji builda, simbola i pripreme za AMD uProf su u
 [uputama modula](../volumetrics/README.md). Nedostupne hardverske brojače označiti
 `N/A`; ne tumačiti procijenjeni throughput kao broj izvršenih instrukcija.
+
+Raniji `00-baseline/` ostaje predložak radi postojećih linkova. Referentni podaci
+su u `baseline/`. Ne prepisivati ih novim mjerenjima. Inclusive/exclusive uzorke
+profilera ne sabirati s benchmark intervalima.

@@ -1,6 +1,9 @@
 # Sekvencijalni baseline — predložak
 
-Status: nije profilirano. Funkcionalne provjere modularizacije nisu baseline mjerenje.
+Ovo je raniji prazan predložak, sačuvan radi postojećih linkova. Stvarni
+**Baseline V0** je u [../baseline/README.md](../baseline/README.md), s pet
+originalnih CSV serija, uProf slikama, metapodacima i izračunatim statistikama.
+Ovaj folder ne sadrži dodatna mjerenja; `metrics.csv` je samo prazan predložak.
 
 - Datum / osoba:
 - Izvorni kod (hash + lokalni patch):
@@ -16,5 +19,5 @@ Status: nije profilirano. Funkcionalne provjere modularizacije nisu baseline mje
 Primjer iz korijena repozitorija nakon CPU builda:
 
 ```powershell
-.\build-cpu\volumetrics\VolumetricBenchmark.exe --iterations 1000 --warmup 3 --width 240 --height 180 --steps 64 --shadow-size 1024 --csv optimization/00-baseline/timings.csv
+.\build-cpu\volumetrics\VolumetricBenchmark.exe --iterations 1000 --warmup 3 --width 240 --height 180 --steps 64 --shadow-size 1024 --csv build-cpu/new-run.csv
 ```

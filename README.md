@@ -20,7 +20,7 @@ Objedinjena verzija zadržava osnovnu meku maglu i dodaje shadowed directional s
 
 - [`opengl-forward-renderer/`](opengl-forward-renderer/): kompletan OpenGL renderer, izvorni kod, shaderi, resursi i upute za build. Početak: [upute za postavljanje](opengl-forward-renderer/docs/setup.md).
 - [`volumetrics/`](volumetrics/): CPU i OpenGL DLL, benchmark, shaderi i integracijski adapteri.
-- [`optimization/`](optimization/): predlošci za baseline, profiler screenshotove i iteracije optimizacije.
+- [`optimization/`](optimization/): [Baseline V0 analiza](optimization/baseline/README.md), izvorni rezultati i predlošci budućih iteracija optimizacije.
 - [`DOCS/Prezentacija/`](DOCS/Prezentacija/): prezentacija projekta.
 - [`DOCS/Izvori/`](DOCS/Izvori/): literatura i linkovi na radove, slajdove i implementacije.
 
