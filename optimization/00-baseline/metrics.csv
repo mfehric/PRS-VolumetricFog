@@ -1,0 +1,1 @@
+iteration,run,mean_kernel_ms,median_kernel_ms,min_kernel_ms,max_kernel_ms,checksum,cpu_cycles,instructions,ipc,cache_misses,memory_latency,profiler_config,notes

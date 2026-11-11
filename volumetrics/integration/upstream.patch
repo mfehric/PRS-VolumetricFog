@@ -1,0 +1,294 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,7 @@
+ cmake_minimum_required(VERSION 3.26.0)
+ project(ForwardRendererProject)
++
++include(CTest)
+ 
+ set(CMAKE_CXX_STANDARD 20)
+ 
+@@ -100,5 +102,9 @@
+     target_include_directories(tinyddsloader INTERFACE ${tinyddsloader_SOURCE_DIR})
+ endif()
+ 
++set(VOLUMETRICS_BUILD_OPENGL ON CACHE BOOL "Build volumetric OpenGL module")
++set(PRS_VOLUMETRICS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../volumetrics" CACHE PATH "Path to PRS volumetrics module")
++add_subdirectory("${PRS_VOLUMETRICS_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/volumetrics")
++include("${PRS_VOLUMETRICS_DIR}/integration/Integration.cmake")
+ add_subdirectory(src)
+-add_subdirectory(test-app)
+\ No newline at end of file
++add_subdirectory(test-app)
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -90,6 +90,7 @@
+ )
+ 
+ target_link_libraries(${PROJECT_NAME} PUBLIC imgui)
++volumetrics_attach_renderer(${PROJECT_NAME})
+ 
+ # stb_image — header-only, expose include dir
+ if(TARGET stb)
+@@ -105,4 +106,4 @@
+ 
+ if(TARGET assimp::assimp)
+     target_link_libraries(${PROJECT_NAME} PUBLIC assimp::assimp)
+-endif()
+\ No newline at end of file
++endif()
+--- a/src/include/app/Application.h
++++ b/src/include/app/Application.h
+@@ -3,6 +3,7 @@
+ #include <cstdint>
+ #include <memory>
+ #include <vector>
++#include <string>
+ 
+ struct GLFWwindow;
+ class Renderer;
+@@ -26,6 +27,9 @@
+     /// Reads window settings (size, title, vsync) from config/settings.json via Options.
+     /// @return true on success, false if GLFW or GLAD initialization fails
+     bool Initialize();
++
++    // Deterministic integration checks and screenshots, with a current GL context.
++    bool ValidateVolumetrics(Scene& scene, const std::string& outputDirectory);
+ 
+     /// Runs the main loop, driving the given scene each frame.
+     /// Calls scene.OnUpdate() then renders all objects the scene contains.
+--- a/src/include/core/HdrFramebuffer.h
++++ b/src/include/core/HdrFramebuffer.h
+@@ -41,6 +41,7 @@
+ 
+     /// Returns the GL_RGBA16F color texture for the post-process pass.
+     [[nodiscard]] uint32_t GetColorTexture() const { return m_colorTexture; }
++    [[nodiscard]] uint32_t GetFramebuffer() const { return m_fbo; }
+ 
+     [[nodiscard]] uint32_t GetWidth()  const { return m_width;  }
+     [[nodiscard]] uint32_t GetHeight() const { return m_height; }
+--- a/src/include/core/Renderer.h
++++ b/src/include/core/Renderer.h
+@@ -14,6 +14,7 @@
+ #include "core/IBLDebugMode.h"
+ #include "core/shadows/CascadedShadowMap.h"
+ #include "core/RenderConfig.h"
++#include "volumetrics/Pass.h"
+ #include "core/Frustum.h"
+ 
+ struct RenderItem;
+@@ -140,6 +141,7 @@
+     bool shadowPassDataAvailable = false;
+     bool approxTriangleCountApproximate = true; // Triangle estimates are pragmatic and treat non-triangle topologies as 0.
+     bool shadowMapPreviewAvailable = false;
++    VolumetricStats volumetric;
+ };
+ 
+ /// Manages the OpenGL rendering pipeline.
+@@ -162,6 +164,9 @@
+     std::unique_ptr<ShaderProgram> m_shadowDepthShader;
+     std::unique_ptr<CascadedShadowMap> m_directionalShadowMap;
+     std::unique_ptr<HdrFramebuffer> m_hdrFramebuffer;
++    std::unique_ptr<VolumetricGraphicsServices> m_volumetricGraphics;
++    std::unique_ptr<VolumetricPass> m_volumetricPass;
++    VolumetricStats m_volumetricStats;
+     std::unique_ptr<EnvironmentLightingPipeline> m_environmentLightingPipeline;
+     const Skybox* m_currentSkybox = nullptr;
+     const Camera* m_currentCamera = nullptr;
+@@ -205,6 +210,11 @@
+     /// No-op if no HDR framebuffer is active.
+     void RebindHdrFramebuffer();
+ 
++    // Call after all opaque/scene-specific draws, before bloom and tone mapping.
++    void RenderVolumetrics(const FrameSubmission& submission, const VolumetricSettings& settings);
++    const VolumetricStats& GetVolumetricStats() const { return m_volumetricStats; }
++    uint32_t GetVolumetricResultTexture() const { return m_volumetricStats.active && m_volumetricPass ? m_volumetricPass->GetResultTexture() : 0; }
++
+     /// Enqueues a draw item. Must be called between BeginFrame and EndFrame.
+     void SubmitDraw(const RenderItem &item);
+ 
+--- a/src/include/ui/RendererUI.h
++++ b/src/include/ui/RendererUI.h
+@@ -2,6 +2,7 @@
+ #include <cstddef>
+ #include <vector>
+ #include "core/IBLDebugMode.h"
++#include "volumetrics/Lighting.h"
+ 
+ class Scene;
+ class Renderer;
+@@ -18,6 +19,7 @@
+     PostFX = 4,
+     Stats = 5,
+     Terrain = 6,  ///< Only shown when the active scene returns HasTerrainTab() == true
++    Volumetrics = 7,
+ };
+ 
+ class RendererUI {
+@@ -50,6 +52,7 @@
+     bool wireframeOverride = false;
+     bool normalMapOverride = true;
+     bool skyboxOverride = true;
++    VolumetricSettings volumetric{.enabled = true, .backend = VolumetricBackend::GPU};
+     // After: bool skyboxOverride = true;
+     bool  tonemapEnabled        = true;
+     int   tonemapOperator       = 1;   // 0=Reinhard, 1=ACES, 2=Uncharted2
+@@ -75,7 +78,7 @@
+     int m_vpX = 0, m_vpY = 0, m_vpW = 0, m_vpH = 0;
+     int m_prevVpW = -1, m_prevVpH = -1;
+ 
+-    UITab m_activeTab = UITab::Scene;
++    UITab m_activeTab = UITab::Volumetrics;
+ 
+     // ── Draw helpers ──────────────────────────────────────────────────────────
+     void DrawTopbar(int fbWidth,
+@@ -120,5 +123,7 @@
+ 
+     void DrawTabTerrain(Scene &scene);
+ 
++    void DrawTabVolumetrics(const RendererDebugStats& stats);
++
+     void DrawHelpWindow(int fbWidth, int fbHeight);
+ };
+--- a/src/opengl/app/Application.cpp
++++ b/src/opengl/app/Application.cpp
+@@ -1,3 +1,4 @@
++#include "VolumetricUI.h"
+ #include "app/Application.h"
+ #include "assets/AssetImporter.h"
+ #include "scene/Scene.h"
+@@ -271,6 +272,7 @@
+     // which EndFrame unbinds to.
+     m_renderer->RebindHdrFramebuffer();
+     scene.OnPostRender();
++    m_renderer->RenderVolumetrics(sub, m_ui->volumetric);
+     // RenderPostProcess immediately binds its own FBOs and reads the HDR texture
+     // by GL texture ID, so the HDR FBO being bound here is not a problem.
+     const auto postProcessStart = CpuClock::now();
+@@ -639,6 +641,10 @@
+ 
+ void Application::RunHotKeys()
+ {
++    if (m_input->IsKeyPressed(GLFW_KEY_V))
++    {
++        CycleVolumetricMode(m_ui->volumetric);
++    }
+     if (m_input->IsKeyPressed(GLFW_KEY_F11))
+     {
+         ToggleFullscreen();
+--- a/src/opengl/core/Renderer.cpp
++++ b/src/opengl/core/Renderer.cpp
+@@ -297,6 +297,8 @@
+ 
+ void Renderer::Shutdown()
+ {
++    m_volumetricPass.reset();
++    m_volumetricGraphics.reset();
+     if (m_environmentLightingPipeline)
+     {
+         m_environmentLightingPipeline->Shutdown();
+--- a/src/opengl/ui/RendererUI.cpp
++++ b/src/opengl/ui/RendererUI.cpp
+@@ -1,3 +1,4 @@
++#include "VolumetricUI.h"
+ #include "ui/RendererUI.h"
+ #include "ui/UITheme.h"
+ 
+@@ -433,7 +434,7 @@
+         const int visibleTabCount = kTabCount + (hasTerrain ? 1 : 0);
+ 
+         ImGui::SetCursorPos({16, 16});
+-        ImGui::BeginChild("##tabBar", ImVec2(kSidebarWidth - 32, 36),
++        ImGui::BeginChild("##tabBar", ImVec2(kSidebarWidth - 32, 66),
+                           false, ImGuiWindowFlags_NoScrollbar);
+ 
+         const float tabW = (kSidebarWidth - 32) / static_cast<float>(visibleTabCount);
+@@ -459,6 +460,8 @@
+             ImGui::PopStyleColor(4);
+             if (i < visibleTabCount - 1) ImGui::SameLine(0, 0);
+         }
++        if (ImGui::Button("Volumetrics", ImVec2(kSidebarWidth - 32, 30)))
++            m_activeTab = UITab::Volumetrics;
+         ImGui::EndChild();
+ 
+         ImGui::Separator();
+@@ -482,6 +485,7 @@
+             case UITab::PostFX:    DrawTabPostFX(scene, stats);          break;
+             case UITab::Stats:     DrawTabStats(scene, stats);           break;
+             case UITab::Terrain:   DrawTabTerrain(scene);                break;
++            case UITab::Volumetrics: DrawTabVolumetrics(stats);          break;
+         }
+ 
+         if (lookMode) {
+@@ -1311,6 +1315,10 @@
+     scene.OnTerrainTabUI();
+ }
+ 
++void RendererUI::DrawTabVolumetrics(const RendererDebugStats& stats) {
++    DrawVolumetricPanel(volumetric, stats.volumetric);
++}
++
+ // ─────────────────────────────────────────────────────────────────────────────
+ // Help window
+ // ─────────────────────────────────────────────────────────────────────────────
+--- a/test-app/CMakeLists.txt
++++ b/test-app/CMakeLists.txt
+@@ -36,7 +36,8 @@
+ # Copy shaders to test app output directory
+ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+         COMMAND ${CMAKE_COMMAND} -E copy_directory
+-        "${CMAKE_SOURCE_DIR}/assets"
++        "${CMAKE_CURRENT_SOURCE_DIR}/../assets"
+         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
+         COMMENT "Copying assets to test app output directory"
+ )
++volumetrics_attach_demo(${PROJECT_NAME})
+--- a/test-app/src/main.cpp
++++ b/test-app/src/main.cpp
+@@ -6,8 +6,10 @@
+ #include "BistroScene.h"
+ #include "CapturePresetScene.h"
+ #include "TerrainScene.h"
++#include "VolumetricDemoScene.h"
++#include <string_view>
+ 
+-int main()
++int main(int argc, char** argv)
+ {
+     spdlog::info("[TestApp] Starting");
+ 
+@@ -16,6 +18,26 @@
+     {
+         spdlog::error("[TestApp] Application::Initialize() failed — aborting");
+         return -1;
++    }
++
++    VolumetricDemoScene volumetricScene;
++    const bool volumetricOk = volumetricScene.Setup();
++    if (argc > 1 && std::string_view(argv[1]) == "--volumetric-validate")
++        return volumetricOk && app.ValidateVolumetrics(volumetricScene, "build/volumetric-validation") ? 0 : 1;
++    if (argc > 1 && std::string_view(argv[1]) == "--volumetric-demo")
++    {
++        if (!volumetricOk) return 1;
++        app.Run(std::vector<Scene*>{&volumetricScene});
++        return 0;
++    }
++    if (argc > 1 && (std::string_view(argv[1]) == "--bistro-validate" || std::string_view(argv[1]) == "--bistro-demo"))
++    {
++        BistroScene bistro;
++        if (!bistro.Setup()) return 1;
++        if (std::string_view(argv[1]) == "--bistro-validate")
++            return app.ValidateVolumetrics(bistro, "build/bistro-volumetric-validation") ? 0 : 1;
++        app.Run(std::vector<Scene*>{&bistro});
++        return 0;
+     }
+ 
+     TerrainScene terrainScene;
+@@ -52,6 +74,7 @@
+     if (captureDenseGridOk) scenes.push_back(&captureDenseGrid);
+     if (captureMaterialSweepOk) scenes.push_back(&captureMaterialSweep);
+     if (captureCullingOk) scenes.push_back(&captureCulling);
++    if (volumetricOk) scenes.push_back(&volumetricScene);
+ 
+     for (std::size_t i = 0; i < scenes.size(); ++i)
+         spdlog::info("[TestApp] Press {} for {}", i + 1, scenes[i]->GetName());

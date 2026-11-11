@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <vector>
 #include "core/IBLDebugMode.h"
-#include "core/VolumetricLighting.h"
+#include "volumetrics/Lighting.h"
 
 class Scene;
 class Renderer;

@@ -1,12 +1,12 @@
-#include "core/VolumetricPass.h"
-#include "core/ShaderProgram.h"
-#include "core/FullscreenQuad.h"
+#include "volumetrics/Pass.h"
+#include <glad/glad.h>
 
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <string>
-#include <spdlog/spdlog.h>
+#include <filesystem>
+#include <stdexcept>
 
 namespace
 {
@@ -68,11 +68,21 @@ namespace
     };
 }
 
-VolumetricPass::VolumetricPass()
+VolumetricPass::VolumetricPass(VolumetricGraphicsServices& graphics, LoadProc loadProc,
+                               const char* shaderDirectory) : m_graphics(graphics)
 {
-    m_gpuShader = std::make_unique<ShaderProgram>("assets/shaders/tone_mapping.vert", "assets/shaders/volumetric.frag");
-    m_compositeShader = std::make_unique<ShaderProgram>("assets/shaders/tone_mapping.vert", "assets/shaders/volumetric_composite.frag");
-    m_quad = std::make_unique<FullscreenQuad>();
+    if (!loadProc || !gladLoadGLLoader(loadProc))
+        throw std::runtime_error("VolumetricFog: cannot initialize OpenGL dispatch");
+    // Shader/quad services use the host's existing renderer implementations.
+    const auto directory = std::filesystem::path(shaderDirectory);
+    const auto fog = (directory / "volumetric.frag").string();
+    const auto composite = (directory / "volumetric_composite.frag").string();
+    if (!std::filesystem::is_regular_file(fog) || !std::filesystem::is_regular_file(composite))
+        throw std::runtime_error("VolumetricFog: missing shaders in " + directory.string());
+    m_gpuShader.reset(graphics.CreateShader("assets/shaders/tone_mapping.vert", fog.c_str()));
+    m_compositeShader.reset(graphics.CreateShader("assets/shaders/tone_mapping.vert", composite.c_str()));
+    if (!m_gpuShader || !m_compositeShader || !m_gpuShader->IsValid() || !m_compositeShader->IsValid())
+        throw std::runtime_error("VolumetricFog: shader creation failed");
 }
 
 VolumetricPass::~VolumetricPass() { DestroyTargets(); }
@@ -117,7 +127,6 @@ bool VolumetricPass::Resize(int width, int height)
     const bool fogValid = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     if (!depthValid || !fogValid)
     {
-        spdlog::error("[Volumetric] Incomplete framebuffer");
         DestroyTargets();
         return false;
     }
@@ -199,7 +208,7 @@ bool VolumetricPass::Render(const VolumetricFrame& frame, const VolumetricSettin
         m_gpuShader->SetUniform("u_Anisotropy", settings.anisotropy);
         m_gpuShader->SetUniform("u_MaxDistance", settings.maxDistance);
         m_gpuShader->SetUniform("u_Steps", settings.steps);
-        m_quad->Draw();
+        m_graphics.DrawFullscreen();
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, sceneFbo); glViewport(0, 0, sceneWidth, sceneHeight);
@@ -207,7 +216,7 @@ bool VolumetricPass::Render(const VolumetricFrame& frame, const VolumetricSettin
     glBlendFuncSeparate(GL_ONE, GL_SRC_ALPHA, GL_ZERO, GL_ONE);
     m_compositeShader->Bind(); m_compositeShader->SetUniform("u_Fog", 0);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, m_fogTexture);
-    m_quad->Draw();
+    m_graphics.DrawFullscreen();
     m_stats.width = width; m_stats.height = height; m_stats.active = true;
     m_stats.totalCpuMs = Milliseconds(totalStart);
     return true;

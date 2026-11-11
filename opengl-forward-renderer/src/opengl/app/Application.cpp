@@ -1,3 +1,4 @@
+#include "VolumetricUI.h"
 #include "app/Application.h"
 #include "assets/AssetImporter.h"
 #include "scene/Scene.h"
@@ -642,12 +643,7 @@ void Application::RunHotKeys()
 {
     if (m_input->IsKeyPressed(GLFW_KEY_V))
     {
-        auto& fog = m_ui->volumetric;
-        if (!fog.enabled) { fog.enabled = true; fog.backend = VolumetricBackend::CPU; }
-        else if (fog.backend == VolumetricBackend::CPU) fog.backend = VolumetricBackend::GPU;
-        else fog.enabled = false;
-        spdlog::info("[Volumetric] Mode: {}", !fog.enabled ? "Normal Lighting" :
-                     fog.backend == VolumetricBackend::CPU ? "Volumetric CPU" : "Volumetric GPU");
+        CycleVolumetricMode(m_ui->volumetric);
     }
     if (m_input->IsKeyPressed(GLFW_KEY_F11))
     {

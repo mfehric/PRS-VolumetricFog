@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.26.0)
 project(ForwardRendererProject)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 20)
 
 set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/_deps")
@@ -100,5 +102,9 @@ if(NOT TARGET tinyddsloader)
     target_include_directories(tinyddsloader INTERFACE ${tinyddsloader_SOURCE_DIR})
 endif()
 
+set(VOLUMETRICS_BUILD_OPENGL ON CACHE BOOL "Build volumetric OpenGL module")
+set(PRS_VOLUMETRICS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../volumetrics" CACHE PATH "Path to PRS volumetrics module")
+add_subdirectory("${PRS_VOLUMETRICS_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/volumetrics")
+include("${PRS_VOLUMETRICS_DIR}/integration/Integration.cmake")
 add_subdirectory(src)
 add_subdirectory(test-app)

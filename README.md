@@ -6,7 +6,11 @@ Trenutna prva faza implementira volumetrijsku maglu i svjetlo (snopovi svjetla, 
 
 ## Pokretanje volumetrijskog demoa
 
-Iz foldera `opengl-forward-renderer/`, nakon builda, pokrenuti `build/test-app/TestApp.exe --volumetric-demo` (na Linuxu bez `.exe`). U zasebnom panelu **Volumetrics** uključiti ili isključiti **Enable Volumetrics**, a kada je efekat uključen izabrati **CPU (sequential)** ili **GPU**. Tipka **V** kruži kroz Normal/CPU/GPU. Demo ne zahtijeva Bistro resurse; `--bistro-demo` direktno otvara Bistro kada su njegovi resursi instalirani.
+Modularni DLL build, samostalni CPU benchmark i integracija u originalni renderer:
+[upute modula](volumetrics/README.md). Evidencija budućih optimizacija je u
+[optimization/](optimization/README.md).
+
+Nakon builda pokrenuti `TestApp.exe --volumetric-demo` iz foldera `opengl-forward-renderer/build/test-app/` (na Linuxu bez `.exe`). U zasebnom panelu **Volumetrics** uključiti ili isključiti **Enable Volumetrics**, a kada je efekat uključen izabrati **CPU (sequential)** ili **GPU**. Tipka **V** kruži kroz Normal/CPU/GPU. Demo ne zahtijeva Bistro resurse; `--bistro-demo` direktno otvara Bistro kada su njegovi resursi instalirani.
 
 Objedinjena verzija zadržava osnovnu meku maglu i dodaje shadowed directional single scattering. **Soft fog preset** naglašava maglu, a **Window shafts preset** zrake kroz prozore. CPU i GPU koriste isti model; CPU ostaje sekvencijalan, bez OpenMP-a i radnih niti.
 
@@ -15,6 +19,8 @@ Objedinjena verzija zadržava osnovnu meku maglu i dodaje shadowed directional s
 ## Struktura repozitorija
 
 - [`opengl-forward-renderer/`](opengl-forward-renderer/): kompletan OpenGL renderer, izvorni kod, shaderi, resursi i upute za build. Početak: [upute za postavljanje](opengl-forward-renderer/docs/setup.md).
+- [`volumetrics/`](volumetrics/): CPU i OpenGL DLL, benchmark, shaderi i integracijski adapteri.
+- [`optimization/`](optimization/): predlošci za baseline, profiler screenshotove i iteracije optimizacije.
 - [`DOCS/Prezentacija/`](DOCS/Prezentacija/): prezentacija projekta.
 - [`DOCS/Izvori/`](DOCS/Izvori/): literatura i linkovi na radove, slajdove i implementacije.
 

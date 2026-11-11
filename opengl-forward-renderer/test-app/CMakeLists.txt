@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 # Test application executable
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/VolumetricDemoScene.cpp
         src/CapturePresetScene.h
         src/CapturePresetScene.cpp
         src/SampleScene.cpp
@@ -37,7 +36,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # Copy shaders to test app output directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/assets"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../assets"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
         COMMENT "Copying assets to test app output directory"
 )
+volumetrics_attach_demo(${PROJECT_NAME})

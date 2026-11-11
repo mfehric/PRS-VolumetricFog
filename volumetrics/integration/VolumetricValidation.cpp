@@ -1,7 +1,7 @@
 #include "app/Application.h"
 #include "core/Renderer.h"
 #include "core/InputManager.h"
-#include "core/VolumetricRay.h"
+#include "volumetrics/Ray.h"
 #include "scene/Scene.h"
 #include "scene/FrameSubmission.h"
 #include <glad/glad.h>

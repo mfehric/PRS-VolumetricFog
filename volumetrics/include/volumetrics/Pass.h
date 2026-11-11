@@ -1,11 +1,10 @@
 #pragma once
 
-#include "core/VolumetricLighting.h"
+#include "volumetrics/Lighting.h"
+#include "volumetrics/GraphicsServices.h"
 #include <cstdint>
 #include <memory>
 
-class ShaderProgram;
-class FullscreenQuad;
 
 struct VolumetricStats
 {
@@ -16,10 +15,13 @@ struct VolumetricStats
 };
 
 // OpenGL resources/readback/compositing live here, separate from the CPU kernel.
-class VolumetricPass
+class VOLUMETRIC_FOG_API VolumetricPass
 {
 public:
-    VolumetricPass();
+    // Requires a current host GL context; loadProc initializes this DLL's GLAD.
+    using LoadProc = void* (*)(const char*);
+    VolumetricPass(VolumetricGraphicsServices& graphics, LoadProc loadProc,
+                   const char* shaderDirectory);
     ~VolumetricPass();
     VolumetricPass(const VolumetricPass&) = delete;
     VolumetricPass& operator=(const VolumetricPass&) = delete;
@@ -34,8 +36,8 @@ private:
     void DestroyTargets();
     uint32_t m_depthFbo = 0, m_depthTexture = 0, m_fogFbo = 0, m_fogTexture = 0;
     int m_width = 0, m_height = 0;
-    std::unique_ptr<ShaderProgram> m_gpuShader, m_compositeShader;
-    std::unique_ptr<FullscreenQuad> m_quad;
+    std::unique_ptr<VolumetricShader> m_gpuShader, m_compositeShader;
+    VolumetricGraphicsServices& m_graphics;
     std::vector<float> m_depth, m_shadowDepth;
     std::vector<glm::vec4> m_result;
     VolumetricStats m_stats;

@@ -14,7 +14,7 @@
 #include "core/IBLDebugMode.h"
 #include "core/shadows/CascadedShadowMap.h"
 #include "core/RenderConfig.h"
-#include "core/VolumetricPass.h"
+#include "volumetrics/Pass.h"
 #include "core/Frustum.h"
 
 struct RenderItem;
@@ -164,6 +164,7 @@ class Renderer
     std::unique_ptr<ShaderProgram> m_shadowDepthShader;
     std::unique_ptr<CascadedShadowMap> m_directionalShadowMap;
     std::unique_ptr<HdrFramebuffer> m_hdrFramebuffer;
+    std::unique_ptr<VolumetricGraphicsServices> m_volumetricGraphics;
     std::unique_ptr<VolumetricPass> m_volumetricPass;
     VolumetricStats m_volumetricStats;
     std::unique_ptr<EnvironmentLightingPipeline> m_environmentLightingPipeline;

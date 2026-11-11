@@ -1,5 +1,6 @@
 #pragma once
 
+#include "volumetrics/Export.h"
 #include <array>
 #include <span>
 #include <vector>
@@ -45,7 +46,7 @@ namespace VolumetricCPU
 {
     // Independent pixels/rays: the outer loop here is the future OpenMP boundary.
     // No GL calls, jobs, threads, OpenMP or explicit SIMD occur in this kernel.
-    void Integrate(const VolumetricFrame& frame, const VolumetricSettings& settings,
+    VOLUMETRIC_CPU_API void Integrate(const VolumetricFrame& frame, const VolumetricSettings& settings,
                    int width, int height, std::span<const float> sceneDepth,
                    std::span<const float> shadowDepth, std::span<glm::vec4> output);
 }

@@ -5,7 +5,8 @@ A modular, modern **OpenGL 4.6 Core Profile** forward renderer written in C++20,
 ## Quick start
 
 **PRS volumetric lighting demo:** [CPU/GPU ray marching, controls and validation](docs/volumetric-lighting.md).
-After building, run `TestApp --volumetric-demo`; press **V** to cycle Normal → CPU → GPU.
+After building, run `TestApp --volumetric-demo` from the executable directory; press **V** to cycle Normal → CPU → GPU.
+[DLL module, standalone CPU benchmark and upstream integration](../volumetrics/README.md).
 
 **New to this project? Start with [docs/setup.md](./docs/setup.md).** It is
 the single, self-contained guide for installing prerequisites, configuring

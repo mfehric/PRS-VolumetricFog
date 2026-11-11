@@ -1,4 +1,4 @@
-#include "core/VolumetricLighting.h"
+#include "volumetrics/Lighting.h"
 
 #include <algorithm>
 #include <cmath>
