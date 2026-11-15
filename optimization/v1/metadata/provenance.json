@@ -1,0 +1,24 @@
+{
+  "source_commit": "4be7cd15aa3f0c2ff999d68e172c9a6c0e54e03c",
+  "source_worktree": "V1 CPU/test edits already uncommitted before this documentation task; unchanged by analysis",
+  "v0_source_revision": "ca93cdf9797ee30c0939a3114296acebd5cd1022",
+  "v1_cpu_source_sha256": "a0d6cfdbb30170c6c8b0d3ff0b78c7235ff3d872389a3343d463298865ef1b07",
+  "power_conditions": {
+    "v1_selected_profiler_session": "AC charger connected, confirmed by user in this conversation",
+    "v1_five_csv_runs": "not connected to charger, per user clarification that only the last profiler session was on AC",
+    "v0_csv_runs": "not recorded in V0 evidence"
+  },
+  "profiler_screenshot_observations": {
+    "pid": 16524,
+    "duration_seconds": 30.04,
+    "cpu_time_seconds": 27.94,
+    "integrate_exclusive_seconds": 25.03,
+    "integrate_exclusive_percent": 89.58,
+    "integrate_inclusive_seconds": 27.4,
+    "shadow_lookup_line": 103,
+    "shadow_lookup_samples_percent": 30.3507,
+    "concurrency": "one simultaneously active hardware thread in summary graph",
+    "thread_count": 4
+  },
+  "evidence_note": "One repeated top-down screenshot supplied in chat is represented once by its original PNG file."
+}

@@ -1,0 +1,104 @@
+[
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-v1-cpu\\v1_01.csv",
+    "archived": "results/v1_01.csv",
+    "sha256": "d1a8827fef5257532fbb7a713a9d649fbe570d13cc60b5148bd55b62214b68ea",
+    "bytes": 121897
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-v1-cpu\\v1_02.csv",
+    "archived": "results/v1_02.csv",
+    "sha256": "c5eea3907fdb12b6d441045c15a482652951712d682fb41dd6b14cc91533f06f",
+    "bytes": 122079
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-v1-cpu\\v1_03.csv",
+    "archived": "results/v1_03.csv",
+    "sha256": "b1ab92c02137d574d2a60cee14b45228a5cc1bf5f6e969efb097f117088ead98",
+    "bytes": 122092
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-v1-cpu\\v1_04.csv",
+    "archived": "results/v1_04.csv",
+    "sha256": "b198b2c482c77e81ff92c64f566fc0fb4487837d24c5354167bd20fa0603048d",
+    "bytes": 121741
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-v1-cpu\\v1_05.csv",
+    "archived": "results/v1_05.csv",
+    "sha256": "82c1ca28a603636db667d47a13b8601443d9342f7a4962774e288c1fad236eb5",
+    "bytes": 122076
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 143652.png",
+    "archived": "screenshots/hotspots-summary.png",
+    "sha256": "93ba19fe45b6473ced65397c311032eb1c0142e8d7c6c49886211e31ede89d95",
+    "bytes": 85137
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 143709.png",
+    "archived": "screenshots/session-information.png",
+    "sha256": "734200f89527d5335509f7124c4ec36098530f13d0de6f6133220bdf489702f0",
+    "bytes": 80793
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 143724.png",
+    "archived": "screenshots/function-hotspots.png",
+    "sha256": "a2baca46314c2d50fdb3a131ffd221b96e4767c0d58410710cfe764d7a131708",
+    "bytes": 91130
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 143737.png",
+    "archived": "screenshots/grouped-metrics.png",
+    "sha256": "5e61007395316e5272964a9a2bc99ddeaed8a98368e3fdf40468cd2094e97512",
+    "bytes": 73046
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 143749.png",
+    "archived": "screenshots/top-down-callstack.png",
+    "sha256": "4203f83c924568f1876f6657f1a7568d8368d84501c4abcc9a54a05fec69c00e",
+    "bytes": 48866
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 143820.png",
+    "archived": "screenshots/call-graph.png",
+    "sha256": "6dd32128f4a5278960e36c58ae0a40c93cbc8df6d913233a3fff4414315052f3",
+    "bytes": 94351
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 144035.png",
+    "archived": "screenshots/source-glm.png",
+    "sha256": "142a54a16582f3b64bfe7c8e36347db32579e7bcfa14773b7d062f6c05663695",
+    "bytes": 78406
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 144109.png",
+    "archived": "screenshots/source-cascades.png",
+    "sha256": "35d9a4c6a3a0387ce591c9e8a24ac022623d30b5ac24d433698082e5e54d6353",
+    "bytes": 93100
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 144122.png",
+    "archived": "screenshots/source-shadow-lookup.png",
+    "sha256": "858865175ded3730c072f858061ffb553c33e2e854ec7774077784be2e3581c1",
+    "bytes": 91443
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Pictures\\Screenshots\\Screenshot 2026-11-15 144145.png",
+    "archived": "screenshots/source-integration.png",
+    "sha256": "01280d9dc0af8fee0e590671d6cf92babf47631e1f4fd984595132f016d2de2d",
+    "bytes": 87525
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\AppData\\Roaming\\AMDuProf\\AMDuProf-Hotspots-VolumetricBenchmark(1)\\AMDuProf-VolumetricBenchmark-Hotspots_Nov-15-2026_14-35-26\\session.uprof",
+    "archived": "metadata/session.uprof",
+    "sha256": "46280fb20c561b5a806b578c054f9cf4d599d356eb324edc8e2e03ccfb6796f5",
+    "bytes": 13383
+  },
+  {
+    "source": "C:\\Users\\Korisnik\\Desktop\\Spirala\\PRS-VolumetricFog\\build-v1-cpu\\v1_profile.csv",
+    "archived": "profiler/v1_profile.csv",
+    "sha256": "b6222b81f4e2ce2a4b34f2172fbef6444b4304b4c78a09ee665307524bdf5968",
+    "bytes": 122047
+  }
+]

@@ -4,6 +4,9 @@ Završena je analiza **Baseline V0**, početnog sekvencijalnog CPU algoritma:
 [izvještaj, originalni CSV-ovi, screenshotovi i grafikoni](baseline/README.md).
 Dokumentovanje nije promijenilo CPU/GPU kod, benchmark parametre ni mjerenja.
 
+Prva sekvencijalna optimizacija dokumentovana je u
+[kratkom V1 izvještaju s poređenjem V0/V1](v1/README.md).
+
 ```text
 optimization/
   baseline/               stvarni V0 podaci i analiza: pet serija × 1.000 mjerenja
@@ -13,6 +16,7 @@ optimization/
     metadata/             konfiguracija, porijeklo i hash vrijednosti
     profiler/             zasebna vremena profiliranog pokretanja
   00-baseline/            raniji prazan predložak, nije druga serija mjerenja
+  v1/                     prva sekvencijalna optimizacija: rezultati i poređenje s V0
   iterations/             buduće iteracije: 01-..., 02-...
   comparisons/            buduća poređenja s V0
 ```

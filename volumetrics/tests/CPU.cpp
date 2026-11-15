@@ -13,6 +13,97 @@ namespace
         if (!ok) throw std::runtime_error(message);
         std::cout << "PASS: " << message << '\n';
     }
+
+    // V0's direct world-position visibility calculation is the test oracle.
+    // It deliberately does not use the prepared cascade data/affine shortcut.
+    float ReferenceVisibility(const VolumetricFrame& frame, const VolumetricSettings& settings,
+                              glm::vec3 position, std::span<const float> depth)
+    {
+        if (!settings.shadows || !frame.hasShadows) return 1.0f;
+        const float viewDepth=-(frame.view*glm::vec4(position,1)).z;
+        int cascade=0;
+        while (cascade<4 && viewDepth>frame.shadowSplits[cascade]) ++cascade;
+        if (cascade==4) return 1.0f;
+        const auto clip=frame.shadowMatrices[cascade]*glm::vec4(position,1);
+        if (std::abs(clip.w)<1e-8f) return 1.0f;
+        const auto uvz=glm::vec3(clip)/clip.w*0.5f+0.5f;
+        if (uvz.x<0 || uvz.x>=1 || uvz.y<0 || uvz.y>=1 || uvz.z<0 || uvz.z>1) return 1.0f;
+        const int x=std::min(int(uvz.x*frame.shadowWidth),frame.shadowWidth-1);
+        const int y=std::min(int(uvz.y*frame.shadowHeight),frame.shadowHeight-1);
+        const size_t index=(size_t(cascade)*frame.shadowHeight+y)*frame.shadowWidth+x;
+        return uvz.z-settings.shadowBias<=depth[index] ? 1.0f : 0.0f;
+    }
+
+    void CheckShadowRay(const VolumetricFrame& frame, const VolumetricSettings& settings,
+                        const char* label)
+    {
+        const auto projection=glm::perspective(glm::radians(60.0f),1.0f,0.1f,100.0f);
+        const auto projected=projection*glm::vec4(0,0,-24,1);
+        const std::array<float,1> depth{projected.z/projected.w*0.5f+0.5f};
+        std::vector<float> shadow(size_t(frame.shadowWidth)*frame.shadowHeight*4);
+        for (size_t i=0; i<shadow.size(); ++i) shadow[i]=float((i*13+5)%31)/31;
+        std::array<glm::vec4,1> output;
+        VolumetricCPU::Integrate(frame,settings,1,1,depth,shadow,output);
+
+        const auto world=frame.inverseViewProjection*glm::vec4(0,0,depth[0]*2-1,1);
+        const auto delta=glm::vec3(world)/world.w-frame.cameraPosition;
+        const float length=glm::length(delta);
+        const auto ray=delta/length;
+        const float distance=std::min(length,settings.maxDistance);
+        const float ds=distance/settings.steps, tau=settings.density*ds;
+        const float stepT=std::exp(-tau);
+        const float removed=tau<0.001f ? tau*(1-0.5f*tau+tau*tau/6) : 1-stepT;
+        const float g=settings.anisotropy;
+        const float denominator=1+g*g-2*g*glm::dot(glm::normalize(frame.lightDirection),-ray);
+        const float phase=(1-g*g)/(4*glm::pi<float>()*denominator*std::sqrt(denominator));
+        const auto source=frame.lightRadiance*(phase*settings.scatteringAlbedo*removed);
+        glm::vec3 scattered(0);
+        float t=1;
+        for (int i=0; i<settings.steps; ++i)
+        {
+            const auto position=frame.cameraPosition+ray*((i+0.5f)*ds);
+            scattered+=t*ReferenceVisibility(frame,settings,position,shadow)*source;
+            t*=stepT;
+        }
+        const float totalT=std::exp(-settings.density*distance);
+        scattered+=settings.fogColor*(settings.ambientIntensity*settings.scatteringAlbedo*(1-totalT));
+        const auto error=glm::abs(output[0]-glm::vec4(scattered,totalT));
+        Require(error.x<2e-6f && error.y<2e-6f && error.z<2e-6f && error.w<2e-6f,label);
+    }
+
+    void CheckShadowPaths()
+    {
+        VolumetricFrame frame;
+        frame.inverseViewProjection=glm::inverse(glm::perspective(glm::radians(60.0f),1.0f,0.1f,100.0f));
+        frame.hasShadows=true;
+        frame.shadowWidth=7; frame.shadowHeight=5;
+        frame.shadowSplits={3,7,13,30};
+        frame.lightRadiance={3,2,1};
+        frame.shadowMatrices.fill(glm::ortho(-4.0f,4.0f,-4.0f,4.0f,0.0f,40.0f));
+        VolumetricSettings settings;
+        CheckShadowRay(frame,settings,"affine cascades and rectangular shadow layers match V0 visibility");
+        frame.shadowSplits={3,7,13,18};
+        CheckShadowRay(frame,settings,"rays beyond the last cascade match V0 visibility");
+        frame.view[3][2]=-24;
+        frame.view[2][2]=-1;
+        CheckShadowRay(frame,settings,"decreasing view depth crosses cascades backwards correctly");
+        frame.view=glm::mat4(1);
+        frame.shadowSplits={7,3,13,30};
+        CheckShadowRay(frame,settings,"unsorted splits preserve the general visibility path");
+        frame.shadowSplits={3,7,13,30};
+        for (auto& matrix: frame.shadowMatrices) matrix[2][3]=-0.03f;
+        CheckShadowRay(frame,settings,"projective shadow matrices retain homogeneous division");
+        for (auto& matrix: frame.shadowMatrices) { matrix[2][3]=0; matrix[3][3]=1e-10f; }
+        CheckShadowRay(frame,settings,"near-zero homogeneous w retains the V0 guard");
+        for (float edge: {-1.00001f,-1.0f,0.999999f,1.0f,1.00001f})
+        {
+            frame.shadowMatrices.fill(glm::ortho(-4.0f,4.0f,-4.0f,4.0f,0.0f,40.0f));
+            for (auto& matrix: frame.shadowMatrices) matrix[3][0]=edge;
+            CheckShadowRay(frame,settings,"shadow UV boundary checks retain V0 behavior");
+        }
+        settings.shadows=false;
+        CheckShadowRay(frame,settings,"unshadowed specialization retains V0 single-scattering sum");
+    }
 }
 
 int main()
@@ -48,6 +139,7 @@ int main()
         try { VolumetricCPU::Integrate(frame,settings,2,1,depth,{},output); }
         catch (const std::invalid_argument&) { rejected=true; }
         Require(rejected,"invalid image dimensions rejected");
+        CheckShadowPaths();
 
         auto scene=benchmark::MakeWindowRoom(80,60,128);
         auto again=benchmark::MakeWindowRoom(80,60,128);
