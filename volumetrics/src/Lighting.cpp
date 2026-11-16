@@ -62,6 +62,9 @@ namespace
     }
 
     template<ShadowMode mode>
+    #if defined(_MSC_VER)
+    __forceinline
+    #endif
     float Visibility(const Shadows& shadows, const glm::vec3& position, int& cascade)
     {
         const auto& row = shadows.viewZ;
