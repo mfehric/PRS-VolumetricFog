@@ -7,6 +7,9 @@ Dokumentovanje nije promijenilo CPU/GPU kod, benchmark parametre ni mjerenja.
 Prva sekvencijalna optimizacija dokumentovana je u
 [kratkom V1 izvještaju s poređenjem V0/V1](v1/README.md).
 
+Druga optimizacija (inline `Visibility`) i Intel VTune mikroarhitekturna analiza
+(Core Bound, ne Memory Bound) su u [V2 izvještaju](v2/README.md).
+
 ```text
 optimization/
   baseline/               stvarni V0 podaci i analiza: pet serija × 1.000 mjerenja
